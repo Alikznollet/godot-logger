@@ -33,7 +33,7 @@ const NETWORK := Channel.NETWORK
 const UI := Channel.UI
 const INPUT := Channel.INPUT
 	
-const _LOG_DIR: String = "user://logs/"
+static var _log_dir: String = "user://logs/"
 const _LOG_EXTENSION: String = "log"
 
 const _MAX_LOG_FILES: int = 5
@@ -79,6 +79,14 @@ static var _min_log_level: Event = Event.DEBUG
 static var _active_channels: Array = Channel.values()
 
 static func _static_init() -> void:
+	# Load project settings.
+	var is_enabled: bool = ProjectSettings.get_setting(SpectrePaths.LOG_ENABLED_SETTING, true)
+	_log_dir = ProjectSettings.get_setting(SpectrePaths.LOG_DIR_SETTING, "user://logs/")
+
+	# If disabled just stop initialization
+	if not is_enabled:
+		return
+
 	if not OS.is_debug_build():
 		_min_log_level = Event.INFO # If Release build only include INFO and up.
 
@@ -100,21 +108,21 @@ static func _static_init() -> void:
 ## Creates a new log file for the current Date and Time.
 static func _create_log_file() -> FileAccess:
 	# Create the logging directory if it does not exist yet.
-	if not DirAccess.dir_exists_absolute(_LOG_DIR):
-		DirAccess.make_dir_recursive_absolute(_LOG_DIR)
+	if not DirAccess.dir_exists_absolute(_log_dir):
+		DirAccess.make_dir_recursive_absolute(_log_dir)
 
 	# Create a file_name based on time and process ID, so multiple DEBUG sessions can be started.
 	var file_name := "%s_%d.%s" % [Time.get_datetime_string_from_system().replace(":", "-"), _pid, _LOG_EXTENSION]
-	var file_path := _LOG_DIR.path_join(file_name)
+	var file_path := _log_dir.path_join(file_name)
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	return file
 
 ## Removes the oldest log files when the amount exceeds _MAX_LOG_FILES
 static func _remove_old_log_files() -> void:
 	var log_file_paths: Array[String] = []
-	for file: String in DirAccess.get_files_at(_LOG_DIR):
+	for file: String in DirAccess.get_files_at(_log_dir):
 		if file.get_extension().to_lower() == _LOG_EXTENSION:
-			log_file_paths.append(_LOG_DIR.path_join(file))
+			log_file_paths.append(_log_dir.path_join(file))
 	while log_file_paths.size() > _MAX_LOG_FILES:
 		var path: String = log_file_paths.pop_front()
 		var err := DirAccess.remove_absolute(path)
@@ -238,6 +246,8 @@ static func unmute_channel(channel: Channel) -> void:
 
 ## Adds a message to the log file, thread-safe.
 static func _add_message_to_file_queue(message: String, event: Event) -> void:
+	if not _is_logger_active: return
+
 	_mutex.lock()
 	_message_queue.append({"msg": message, "flush": (event >= Event.ERROR)})
 	_mutex.unlock()
