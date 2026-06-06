@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 file_logging/enable_file_logging.pc=false
 settings/gdscript/always_track_call_stacks=true
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/spectre-logger/plugin.cfg")
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

@@ -1,5 +1,5 @@
 extends Logger
-class_name Log
+class_name Spectre
 ## Custom Log class to aid in debugging.
 ##
 ## Heavily based on the Log.gd in https://forum.godotengine.org/t/how-to-use-the-new-logger-class-in-godot-4-5/127006
@@ -92,7 +92,7 @@ static func _static_init() -> void:
 		_thread = Thread.new()
 		_thread.start(_thread_worker)
 
-		OS.add_logger(Log.new())
+		OS.add_logger(Spectre.new())
 		info("Logger Initialized...")
 
 		_remove_old_log_files()
