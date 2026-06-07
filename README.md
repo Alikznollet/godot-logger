@@ -9,6 +9,7 @@ Spectre is a high-performance, multi-threaded logging utility for Godot 4. It in
 * **Multi-Threaded File Writing:** Writes logs to disk on a background thread to prevent game stuttering.
 * **Engine Interception:** Automatically catches standard `print()` calls and internal Godot Engine errors/warnings.
 * **Zero-Cost Kill Switch:** Disable the logger entirely via Project Settings. The internal "No-Op" architecture ensures all your `Spectre.info()` calls return instantly with zero performance hit, meaning you never have to strip logs out of your release builds.
+* **Fail-Fast Architecture:** Smart `CRITICAL` logs that optionally force-crash the engine in Debug builds to catch game-breaking bugs instantly, while failing gracefully in your exported release builds.
 * **Log Rotation:** Automatically cleans up old log files based on a configurable limit.
 * **Custom Channels:** Categorize your logs (Physics, Network, UI, etc.) and mute/unmute them on the fly.
 * **Rich Console Output:** Color-coded console messages based on log severity.
@@ -30,9 +31,12 @@ Spectre is a high-performance, multi-threaded logging utility for Godot 4. It in
 
 1. Make sure you have the [wisp CLI](https://www.github.com/alikznollet/godot-wisp) installed and have ran `wisp init` in your project.
 2. Run:
-```
+
+```bash
 wisp install alikznollet/godot-spectre
+
 ```
+
 3. Open your project in the Godot Editor.
 4. Go to **Project > Project Settings > Plugins**.
 5. Find **Spectre Logger** and check if the **Enable** box is checked.
@@ -50,6 +54,7 @@ Spectre.info("Connecting to server...")
 Spectre.warn("Framerate dropped below 60!")
 Spectre.error("Failed to load save file.")
 Spectre.critical("Server disconnected unexpectedly!")
+
 ```
 
 ### Using Channels
@@ -82,6 +87,19 @@ Spectre.unmute_all()
 
 ---
 
+## 💥 Fail-Fast Philosophy (Crash on Critical)
+
+Spectre is built around the "Fail-Fast" architecture for software development. This means distinguishing between an error you can recover from, and an error that threatens to corrupt your game state.
+
+* **`Spectre.error()`** - Use when the game encounters a bug (like a missing node or failed spawn), but can keep limping along. Check the logs later.
+* **`Spectre.critical()`** - Use when the game enters an impossible state (like writing to a corrupted save file).
+
+By default, calling `Spectre.critical()` while testing in the Godot Editor (or a Debug export) will **intentionally crash the engine** after flushing the log file. This prevents cascading errors and forces you to fix the root cause immediately.
+
+However, because it checks `OS.is_debug_build()`, **it will fail gracefully for your actual players** in Release builds, preventing abrupt desktop crashes.
+
+---
+
 ## ⚙️ Configuration
 
 Spectre is highly customizable right out of the box. Once the plugin is enabled, go to **Project > Project Settings** and scroll down to **Addons > Spectre Logger** in the left sidebar.
@@ -89,6 +107,7 @@ Spectre is highly customizable right out of the box. Once the plugin is enabled,
 From here, you can configure:
 
 * **Is Enabled:** The master kill switch.
+* **Crash on Critical:** Toggles the Fail-Fast behavior. If checked, `CRITICAL` logs will force-crash the engine in Debug builds.
 * **Log Directory:** Where your `.log` files are saved (defaults to `user://logs/`).
 * **Min Log Level:** Ignore events below a certain severity (e.g., only log `WARN` and above).
 * **Max Files:** How many old log files to keep before deleting them.
@@ -101,8 +120,9 @@ From here, you can configure:
 
 ## 🛑 Safe Shutdown
 
-While Spectre handles standard Godot exits gracefully, if you are doing custom shutdown logic and need to guarantee that the final messages in the buffer are written to disk before the game window closes, call:
+While Spectre handles standard Godot exits gracefully using `NOTIFICATION_PREDELETE`, if you are doing custom shutdown logic and need to guarantee that the final messages in the buffer are written to disk *before* you manually terminate the game window, call:
 
 ```gdscript
 Spectre.shutdown()
+
 ```
