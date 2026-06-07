@@ -55,16 +55,21 @@ func _enter_tree() -> void:
 	)
 
 	_add_setting(
-		SpectrePaths.MAX_BUFFER_SIZE_SETTING,
-		10,
-		TYPE_INT,
-		PROPERTY_HINT_RANGE,
-		"1,50,1"
+		SpectrePaths.CRASH_ON_CRITICAL_SETTING,
+		true,
+		TYPE_BOOL,
 	)
 	_add_setting(
 		SpectrePaths.SHOW_PID_IN_PRINT_SETTING,
 		false,
 		TYPE_BOOL
+	)
+	_add_setting(
+		SpectrePaths.MAX_BUFFER_SIZE_SETTING,
+		10,
+		TYPE_INT,
+		PROPERTY_HINT_RANGE,
+		"1,50,1"
 	)
 	_add_setting(
 		SpectrePaths.MIN_LOG_LEVEL_SETTING,

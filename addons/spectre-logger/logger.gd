@@ -41,7 +41,12 @@ static var _max_buffer_size: int = 10
 
 ## You can switch this to false to hide the PID from being printed in the console.
 ## PID will not be logged to the file.
-static var _show_pid_in_print: bool = true
+static var _show_pid_in_print: bool = false
+
+## Whether to crash when a critical log is called.
+## It's good practice to do this (FAIL FAST). So this is enabled by default.
+## Can be disabled in the project settings
+static var _crash_on_critical: bool = true
 
 ## Which events cause a flush to the log file.
 const _FLUSH_EVENTS: PackedByteArray = [
@@ -86,6 +91,7 @@ static func _static_init() -> void:
 	_max_log_files = ProjectSettings.get_setting(SpectrePaths.MAX_FILES_SETTING, 5)
 	_max_buffer_size = ProjectSettings.get_setting(SpectrePaths.MAX_BUFFER_SIZE_SETTING, 10)
 	_show_pid_in_print = ProjectSettings.get_setting(SpectrePaths.SHOW_PID_IN_PRINT_SETTING, false)
+	_crash_on_critical = ProjectSettings.get_setting(SpectrePaths.CRASH_ON_CRITICAL_SETTING, true)
 	_min_log_level = ProjectSettings.get_setting(SpectrePaths.MIN_LOG_LEVEL_SETTING, Event.DEBUG)
 
 	# Load logger colors
@@ -247,6 +253,11 @@ static func error(message: String, channel: Channel = Channel.GENERAL) -> void:
 static func critical(message: String, channel: Channel = Channel.GENERAL) -> void:
 	_log(message, Event.CRITICAL, channel)
 
+	# Only crash when in debug mode AND the user left the setting checked.
+	if OS.is_debug_build() and _crash_on_critical:
+		OS.delay_msec(100)
+		OS.crash("CRITICAL ERROR: " + message)
+
 ## Forcibly flush the log file.
 static func force_flush() -> void:
 	_add_message_to_file_queue("", Event.FORCE_FLUSH)
@@ -276,7 +287,8 @@ static func _add_message_to_file_queue(message: String, event: Event) -> void:
 	if not _is_logger_active: return
 
 	_mutex.lock()
-	_message_queue.append({"msg": message, "flush": (event >= Event.ERROR)})
+	var should_flush: bool = _FLUSH_EVENTS.has(event)
+	_message_queue.append({"msg": message, "flush": should_flush})
 	_mutex.unlock()
 
 	_semaphore.post() # Wake up the worker.

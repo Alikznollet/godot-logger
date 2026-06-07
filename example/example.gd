@@ -8,7 +8,6 @@ func _ready() -> void:
 	Spectre.warn("Unexpected introduction detected") # Spectres a WARN message.
 	Spectre.error("Failed to provide adequate response") # Spectres an ERROR message.
 	Spectre.critical("Entered a State that is impossible, crashing...") # Spectres a CRITICAL message.
-	# OS.crash("See Above") # Uncomment this line for a manual crash (FAIL-FAST)
 	Spectre.force_flush() # Forcibly flushes the file.
 
 	# Can mute individual channels so Spectres don't show up for them.
