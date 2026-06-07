@@ -87,7 +87,7 @@ Spectre.unmute_all()
 
 ---
 
-## 💥 Fail-Fast Philosophy (Crash on Critical)
+## 💥 Fail-Fast
 
 Spectre is built around the "Fail-Fast" architecture for software development. This means distinguishing between an error you can recover from, and an error that threatens to corrupt your game state.
 
