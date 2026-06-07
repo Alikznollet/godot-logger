@@ -26,25 +26,6 @@ func _enter_tree() -> void:
 		PROPERTY_HINT_RANGE,
 		"1,50,1"
 	)
-	_add_setting(
-		SpectrePaths.MAX_BUFFER_SIZE_SETTING,
-		10,
-		TYPE_INT,
-		PROPERTY_HINT_RANGE,
-		"1,50,1"
-	)
-	_add_setting(
-		SpectrePaths.SHOW_PID_IN_PRINT_SETTING,
-		false,
-		TYPE_BOOL
-	)
-	_add_setting(
-		SpectrePaths.MIN_LOG_LEVEL_SETTING,
-		Spectre.Event.DEBUG,
-		TYPE_INT,
-		PROPERTY_HINT_ENUM,
-		"Debug,Info,Warn,Error,Critical"
-	)
 
 	# Color settings
 	_add_setting(
@@ -71,6 +52,35 @@ func _enter_tree() -> void:
 		SpectrePaths.COLOR_CRITICAL_SETTING,
 		Color.CRIMSON,
 		TYPE_COLOR
+	)
+
+	_add_setting(
+		SpectrePaths.MAX_BUFFER_SIZE_SETTING,
+		10,
+		TYPE_INT,
+		PROPERTY_HINT_RANGE,
+		"1,50,1"
+	)
+	_add_setting(
+		SpectrePaths.SHOW_PID_IN_PRINT_SETTING,
+		false,
+		TYPE_BOOL
+	)
+	_add_setting(
+		SpectrePaths.MIN_LOG_LEVEL_SETTING,
+		Spectre.Event.DEBUG,
+		TYPE_INT,
+		PROPERTY_HINT_ENUM,
+		"Debug,Info,Warn,Error,Critical"
+	)
+
+	# Set up the active channels
+	_add_setting(
+		SpectrePaths.ACTIVE_CHANNELS_SETTING,
+		127, # All channels checked (bitmask)
+		TYPE_INT,
+		PROPERTY_HINT_FLAGS,
+		"General,Physics,Audio,Render,Network,Ui,Input"
 	)
 
 func _exit_tree() -> void:

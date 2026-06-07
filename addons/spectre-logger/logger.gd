@@ -101,6 +101,15 @@ static func _static_init() -> void:
 	_event_colors[Event.ERROR] = "#" + c_error.to_html(false)
 	_event_colors[Event.CRITICAL] = "#" + c_critical.to_html(false)
 
+	# Set up the channel filters
+	var channel_mask: int = ProjectSettings.get_setting(SpectrePaths.ACTIVE_CHANNELS_SETTING, 127)
+	_active_channels.clear()
+
+	# Unpack bitmask
+	for i in range(Channel.size()):
+		if channel_mask & (1 << i): 
+			_active_channels.append(i as Channel)
+
 	# If disabled just stop initialization
 	if not is_enabled:
 		return
