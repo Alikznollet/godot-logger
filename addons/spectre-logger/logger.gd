@@ -51,7 +51,7 @@ const _FLUSH_EVENTS: PackedByteArray = [
 ]
 
 ## Colors associated with each event.
-const EVENT_COLORS: Dictionary[Event, String] = {
+static var _event_colors: Dictionary[Event, String] = {
 	Event.DEBUG: "light_blue",
 	Event.INFO: "dark_sea_green",
 	Event.WARN: "golden_rod",
@@ -87,6 +87,19 @@ static func _static_init() -> void:
 	_max_buffer_size = ProjectSettings.get_setting(SpectrePaths.MAX_BUFFER_SIZE_SETTING, 10)
 	_show_pid_in_print = ProjectSettings.get_setting(SpectrePaths.SHOW_PID_IN_PRINT_SETTING, false)
 	_min_log_level = ProjectSettings.get_setting(SpectrePaths.MIN_LOG_LEVEL_SETTING, Event.DEBUG)
+
+	# Load logger colors
+	var c_debug: Color = ProjectSettings.get_setting(SpectrePaths.COLOR_DEBUG_SETTING, Color.LIGHT_BLUE)
+	var c_info: Color = ProjectSettings.get_setting(SpectrePaths.COLOR_INFO_SETTING, Color.DARK_SEA_GREEN)
+	var c_warn: Color = ProjectSettings.get_setting(SpectrePaths.COLOR_WARN_SETTING, Color.GOLDENROD)
+	var c_error: Color = ProjectSettings.get_setting(SpectrePaths.COLOR_ERROR_SETTING, Color.TOMATO)
+	var c_critical: Color = ProjectSettings.get_setting(SpectrePaths.COLOR_CRITICAL_SETTING, Color.CRIMSON)
+
+	_event_colors[Event.DEBUG] = "#" + c_debug.to_html(false)
+	_event_colors[Event.INFO] = "#" + c_info.to_html(false)
+	_event_colors[Event.WARN] = "#" + c_warn.to_html(false)
+	_event_colors[Event.ERROR] = "#" + c_error.to_html(false)
+	_event_colors[Event.CRITICAL] = "#" + c_critical.to_html(false)
 
 	# If disabled just stop initialization
 	if not is_enabled:
@@ -264,7 +277,7 @@ static func _print_event(message: String, event: Event) -> void:
 	var message_lines := message.split("\n")
 
 	var pid_tag: String = "[%d] " % _pid if _show_pid_in_print else ""
-	message_lines[0] = "[b][color=%s]%s%s[/color][/b]" % [EVENT_COLORS[event], pid_tag, message_lines[0]]
+	message_lines[0] = "[b][color=%s]%s%s[/color][/b]" % [_event_colors[event], pid_tag, message_lines[0]]
 	print_rich.call_deferred("[lang=tlh]%s[/lang]" % "\n".join(message_lines))
 
 ## -- Multi-Threading -- ##
