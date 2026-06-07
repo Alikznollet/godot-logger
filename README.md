@@ -1,4 +1,4 @@
-# Spectre Logger for Godot
+# ❄️ Spectre Logger
 
 Spectre is a high-performance, multi-threaded logging utility for Godot 4. It intercepts standard engine outputs, provides detailed GDScript backtraces, and formats everything beautifully in both the editor console and external `.log` files without blocking your main game thread.
 

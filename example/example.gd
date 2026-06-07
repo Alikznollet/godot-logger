@@ -1,13 +1,8 @@
 extends Control
-## This file acts as an example of how to use the Spectreger.
-
-## This has to be in a GLOBAL. So that the Spectreger is only shut down when the game closes.
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_EXIT_TREE:
-		Spectre.shutdown() # Shuts down the Spectreger.
+## This file acts as an example of how to use the Spectre Logger.
 
 func _ready() -> void:
-	# Below are all the Spectreging functions, they optionally take a channel argument.
+	# Below are all the Spectre Logging functions, they optionally take a channel argument.
 	Spectre.debug("Debug message") # Spectres a DEBUG message.
 	Spectre.info("Hello there!") # Spectres an INFO message.
 	Spectre.warn("Unexpected introduction detected") # Spectres a WARN message.

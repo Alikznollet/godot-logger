@@ -343,3 +343,10 @@ static func shutdown() -> void:
 	if _log_file:
 		_log_file.close()
 	_is_logger_active = false
+
+# -- Lifecycle -- #
+
+## This runs when the Spectre instance created in _static_init is destroyed by the engine upon quitting.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		Spectre.shutdown()
