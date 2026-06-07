@@ -8,6 +8,8 @@
 
 config_version=5
 
+=true
+
 [addons]
 
 spectre_logger/save_directory="user://logs/"

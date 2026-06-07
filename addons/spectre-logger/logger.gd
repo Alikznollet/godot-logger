@@ -34,14 +34,14 @@ const UI := Channel.UI
 const INPUT := Channel.INPUT
 	
 static var _log_dir: String = "user://logs/"
-const _LOG_EXTENSION: String = "log"
+static var _log_extension: String = "log"
 
-const _MAX_LOG_FILES: int = 5
-const _MAX_BUFFER_SIZE: int = 10
+static var _max_log_files: int = 5
+static var _max_buffer_size: int = 10
 
 ## You can switch this to false to hide the PID from being printed in the console.
 ## PID will not be logged to the file.
-const _SHOW_PID_IN_PRINT: bool = true
+static var _show_pid_in_print: bool = true
 
 ## Which events cause a flush to the log file.
 const _FLUSH_EVENTS: PackedByteArray = [
@@ -82,6 +82,11 @@ static func _static_init() -> void:
 	# Load project settings.
 	var is_enabled: bool = ProjectSettings.get_setting(SpectrePaths.LOG_ENABLED_SETTING, true)
 	_log_dir = ProjectSettings.get_setting(SpectrePaths.LOG_DIR_SETTING, "user://logs/")
+	_log_extension = ProjectSettings.get_setting(SpectrePaths.LOG_EXTENSION_SETTING, "log")
+	_max_log_files = ProjectSettings.get_setting(SpectrePaths.MAX_FILES_SETTING, 5)
+	_max_buffer_size = ProjectSettings.get_setting(SpectrePaths.MAX_BUFFER_SIZE_SETTING, 10)
+	_show_pid_in_print = ProjectSettings.get_setting(SpectrePaths.SHOW_PID_IN_PRINT_SETTING, false)
+	_min_log_level = ProjectSettings.get_setting(SpectrePaths.MIN_LOG_LEVEL_SETTING, Event.DEBUG)
 
 	# If disabled just stop initialization
 	if not is_enabled:
@@ -112,18 +117,18 @@ static func _create_log_file() -> FileAccess:
 		DirAccess.make_dir_recursive_absolute(_log_dir)
 
 	# Create a file_name based on time and process ID, so multiple DEBUG sessions can be started.
-	var file_name := "%s_%d.%s" % [Time.get_datetime_string_from_system().replace(":", "-"), _pid, _LOG_EXTENSION]
+	var file_name := "%s_%d.%s" % [Time.get_datetime_string_from_system().replace(":", "-"), _pid, _log_extension]
 	var file_path := _log_dir.path_join(file_name)
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	return file
 
-## Removes the oldest log files when the amount exceeds _MAX_LOG_FILES
+## Removes the oldest log files when the amount exceeds _max_log_files
 static func _remove_old_log_files() -> void:
 	var log_file_paths: Array[String] = []
 	for file: String in DirAccess.get_files_at(_log_dir):
-		if file.get_extension().to_lower() == _LOG_EXTENSION:
+		if file.get_extension().to_lower() == _log_extension:
 			log_file_paths.append(_log_dir.path_join(file))
-	while log_file_paths.size() > _MAX_LOG_FILES:
+	while log_file_paths.size() > _max_log_files:
 		var path: String = log_file_paths.pop_front()
 		var err := DirAccess.remove_absolute(path)
 		if err:
@@ -258,7 +263,7 @@ static func _add_message_to_file_queue(message: String, event: Event) -> void:
 static func _print_event(message: String, event: Event) -> void:
 	var message_lines := message.split("\n")
 
-	var pid_tag: String = "[%d] " % _pid if _SHOW_PID_IN_PRINT else ""
+	var pid_tag: String = "[%d] " % _pid if _show_pid_in_print else ""
 	message_lines[0] = "[b][color=%s]%s%s[/color][/b]" % [EVENT_COLORS[event], pid_tag, message_lines[0]]
 	print_rich.call_deferred("[lang=tlh]%s[/lang]" % "\n".join(message_lines))
 
@@ -287,7 +292,7 @@ static func _thread_worker() -> void:
 					buffer_size += 1
 
 				# We flush if the message needs flushing or the buffer size is exceeded.
-				if entry.flush or buffer_size >= _MAX_BUFFER_SIZE:
+				if entry.flush or buffer_size >= _max_buffer_size:
 					_log_file.flush()
 					buffer_size = 0
 

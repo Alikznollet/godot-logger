@@ -15,6 +15,42 @@ func _enter_tree() -> void:
 		PROPERTY_HINT_DIR
 	)
 
+	_add_setting(
+		SpectrePaths.LOG_EXTENSION_SETTING,
+		"log",
+		TYPE_STRING
+	)
+
+	_add_setting(
+		SpectrePaths.MAX_FILES_SETTING,
+		5,
+		TYPE_INT,
+		PROPERTY_HINT_RANGE,
+		"1,50,1"
+	)
+
+	_add_setting(
+		SpectrePaths.MAX_BUFFER_SIZE_SETTING,
+		10,
+		TYPE_INT,
+		PROPERTY_HINT_RANGE,
+		"1,50,1"
+	)
+
+	_add_setting(
+		SpectrePaths.SHOW_PID_IN_PRINT_SETTING,
+		false,
+		TYPE_BOOL
+	)
+
+	_add_setting(
+		SpectrePaths.MIN_LOG_LEVEL_SETTING,
+		Spectre.Event.DEBUG,
+		TYPE_INT,
+		PROPERTY_HINT_ENUM,
+		"Debug,Info,Warn,Error,Critical"
+	)
+
 func _exit_tree() -> void:
 	# Clean-up of the plugin goes here.
 	pass
@@ -36,3 +72,6 @@ func _add_setting(name: String, default: Variant, type: int, hint: int = PROPERT
 
 	# Set the default value
 	ProjectSettings.set_initial_value(name, default)
+
+	# Set as a basic setting
+	ProjectSettings.set_as_basic(name, true)
