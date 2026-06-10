@@ -16,7 +16,7 @@ spectre_logger/misc/crash_on_critical=false
 [application]
 
 config/name="Logger"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [debug]

@@ -153,17 +153,20 @@ static func _create_log_file() -> FileAccess:
 ## Removes the oldest log files when the amount exceeds _max_log_files
 static func _remove_old_log_files() -> void:
 	var log_file_paths: Array[String] = []
+
 	for file: String in DirAccess.get_files_at(_log_dir):
 		if file.get_extension().to_lower() == _log_extension:
 			log_file_paths.append(_log_dir.path_join(file))
+
+	# Sort alphabetically.
+	log_file_paths.sort()
+
 	while log_file_paths.size() > _max_log_files:
 		var path: String = log_file_paths.pop_front()
 		var err := DirAccess.remove_absolute(path)
 		if err:
-			pass
 			error("Failed to clean up old log (%s): %s" % [error_string(err), path])
 		else:
-			pass
 			info("Cleaned up old log: %s" % path)
 
 # -- Helper Functions -- #

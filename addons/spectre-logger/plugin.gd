@@ -1,7 +1,30 @@
 @tool
 extends EditorPlugin
 
+const GODOT_LOG_SETTING = "debug/file_logging/enable_file_logging"
+const GODOT_LOG_SETTING_PC = "debug/file_logging/enable_file_logging.pc"
+
 func _enter_tree() -> void:
+	var settings_changed: bool = false
+
+	if ProjectSettings.get_setting(GODOT_LOG_SETTING, true):
+		ProjectSettings.set_setting(GODOT_LOG_SETTING, false)
+		settings_changed = true
+
+	if ProjectSettings.get_setting(GODOT_LOG_SETTING_PC, true):
+		ProjectSettings.set_setting(GODOT_LOG_SETTING_PC, false)
+		settings_changed = true
+
+	if settings_changed:
+		# Force godot logging to false
+		ProjectSettings.set_setting(GODOT_LOG_SETTING, false)
+
+		var err := ProjectSettings.save()
+		if err == OK:
+			push_warning("Spectre Logger: Disabled Godot's default file logging to prevent file conflicts")
+		else:
+			push_error("Spectre Logger: Failed to save ProjectSettings after disabling native logs.")
+
 	# Add all of the settings
 	_add_setting(
 		SpectrePaths.LOG_ENABLED_SETTING,
@@ -87,10 +110,6 @@ func _enter_tree() -> void:
 		PROPERTY_HINT_FLAGS,
 		"General,Physics,Audio,Render,Network,Ui,Input"
 	)
-
-func _exit_tree() -> void:
-	# Clean-up of the plugin goes here.
-	pass
 
 ## Adds a setting to the ProjectSettings.
 func _add_setting(name: String, default: Variant, type: int, hint: int = PROPERTY_HINT_NONE, hint_string: String = "") -> void:
